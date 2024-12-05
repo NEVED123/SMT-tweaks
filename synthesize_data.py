@@ -1,9 +1,6 @@
-import verovio 
 import numpy as np
-import os
+from krn2png import toPNG
 import cv2
-
-tk = verovio.toolkit()
 
 def generate_kern_time_signature():
     numerator = np.random.choice([2,3,4,6,8,12])
@@ -80,27 +77,13 @@ def generate_full_kern():
     
     full_kern = kern_header + staff_header + clefs + staff_key_signatures + staff_time_signatures
 
-    for i in range(1, np.random.randint(33)):
-        full_kern += generate_kern_measure(i, numerator, denominator)
+    # for i in range(1, np.random.randint(33)):
+    for i in range(5):
+        full_kern += generate_kern_measure(i+1, numerator, denominator)
 
     full_kern += '*-\t*-'
 
     return full_kern
-
-# from smt-plusplus
-def toPNG(music_sequence, filename):
-    tk.loadData(music_sequence)
-    tk.setOptions({"pageWidth": 2100, "footer": 'none', 
-                            'barLineWidth': 0.3, 'beamMaxSlope': 10, 
-                            'staffLineWidth': 0.1, 'spacingStaff': 1})
-    
-    svg = tk.renderToSVG()
-
-    with open("temp.svg", 'w') as file:
-        file.write(svg)
-
-    os.system(f"inkscape -p temp.svg -o {filename} -w 2100 --export-overwrite --export-type=png -b ffffff")
-    os.remove("temp.svg")
 
 def deform_image(filename, mean=0, std=25):
     image = cv2.imread(filename)
@@ -123,12 +106,13 @@ def deform_image(filename, mean=0, std=25):
 
     skewed_image = cv2.warpAffine(image, skew_matrix, (width, height))
     cv2.imwrite(filename, skewed_image)
-    
-kern = generate_full_kern()
 
-with open('mykern.krn', 'w') as file:
-    file.write(kern)
+if __name__ == "__main__":
+    kern = generate_full_kern()
 
-filename = "output.png"
-toPNG(kern, filename)
-deform_image(filename)
+    with open('mykern.krn', 'w') as file:
+        file.write(kern)
+
+    filename = "output.png"
+    toPNG(kern, filename)
+    deform_image(filename)
